@@ -1,0 +1,92 @@
+---
+
+- name: "Bulding Dynamic Inventory Of The AutoScaling Group"
+  hosts: localhost
+  vars_files:
+    - new.vars
+  tasks:
+
+    - name: "Fetching Ec2 Instance Details"
+      ec2_instance_info:
+        aws_access_key: "{{ access_key }}"
+        aws_secret_key: "{{ secret_key }}"
+        region: "{{ region }}"
+        filters:
+          "tag:aws:autoscaling:groupName": "devops_asg"
+          instance-state-name: [ "running"]
+      register: ec2
+
+    - name: "Creating Dymaic Inventory"
+      add_host:
+        name: "{{ item.public_ip_address }}"
+        groups: "instances"
+        ansible_host: "{{ item.public_ip_address }}"
+        ansible_port: 22
+        ansible_user: "ec2-user"
+        ansible_ssh_private_key_file: "{{ key_name }}"
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+      with_items:
+        - "{{ ec2.instances }}"
+
+- name: "Website From GitHub"
+  hosts: instances
+  become: true
+  serial: 1
+  vars_files:
+    - new.vars
+  tasks:
+
+    - name: "Installing Packages"
+      yum:
+        name:
+          - httpd
+          - php
+          - git
+        state: present
+
+
+    - name: "Cloning Repository from Git"
+      git:
+        repo: "{{ git_url }}"
+        dest: "{{ clone_dir }}"
+      register: repo_status
+
+    - name: "Disbaling ELB Health Check"
+      when: repo_status.changed == true
+      file:
+        path: /var/www/html/health.html
+        state: touch
+        mode: 0000
+
+    - name: "Off loading Ec2-Instance From ELB"
+      when: repo_status.changed == true
+      pause:
+        seconds: "{{ health_time }}"
+
+
+    - name: "Copying New Content To documentRoot"
+      when: repo_status.changed == true
+      copy:
+        src: "{{ clone_dir }}"
+        dest: /var/www/html/
+        remote_src: true
+
+
+    - name: "Restarting/enabling Application"
+      when: repo_status.changed == true
+      service:
+        name: httpd
+        state: restarted
+        enabled: true
+
+    - name: "Enabling ELB Health Check"
+      when: repo_status.changed == true
+      file:
+        path: "/var/www/html/{{ health_page }}"
+        state: touch
+        mode: 0644
+
+    - name: "Loading Ec2-Instance to ELB"
+      when: repo_status.changed == true
+      pause:
+        seconds: "{{ health_time }}"
