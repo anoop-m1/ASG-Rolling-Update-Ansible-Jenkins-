@@ -8,7 +8,7 @@ ASG Rolling Update (Ansible + Jenkins)
 ---
 ## Features
 - ASG Rolling updates through ansible-playbook (_Primary_)
-- Includs ELB + ASG + Security group infrastructure on this ansible-playbook
+- Includes ELB + ASG + Security group infrastructure on this ansible-playbook
 - No need for hosts (Inventory file) for ASG under client servers. Because its work with Dynamic Inventory
 - Furthermore, I have included a test website with user-data for more clarification
 - Easy to handle and everyone can change the ASG (Count, Project_Name.. etc values)
@@ -141,3 +141,46 @@ _I just explained the primary thing ASG Rolling update and Which variables I use
       pause:
         seconds: "{{ health_time }}"
 ```
+
+
+# CI/CD Server Setup (JENKINS setup)
+
+~~~
+yum install java-1.8.0-openjdk-devel -y
+wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+yum -y install jenkins
+systemctl start jenkins
+systemctl enable jenkins
+~~~
+
+# Inital Setup
+http://< serverIP >:8080
+    
+# Find the temoprary password from this location  :::   
+cat /var/lib/jenkins/secrets/initialAdminPassword
+
+# Install Ansible On The CI/CD Server
+
+###### amazon-linux-extras install ansible2 -y
+###### yum install git -y
+  
+
+# JENKINS CONFIGURATION
+
+###### Manage jenkins >> MAnage Plugins >> (search for ansible plugin) >> Install Ansible plugin in jenkins >> Tick restart jenkins when installation complete
+###### Manage Jenkins >> Global Tool Configuration >> goto ansible section >> Add ansible (Add name and ansible instalaltion path in server) 
+###### Create a free style project
+###### Select the project time (Select Git project)  >> Add Git code URl
+######  Build Type >> Select Ansible Play book type  >> Add Ansible Playbook path
+###### Build Trigger >> Select Github hook trigger for Gitscm polling
+
+# To Automate using webhook trigger from git
+
+###### Go to Github and add the webhook payload URL 
+(http://< jenkins-server-IP >:8080/github-webhook/)
+  
+###### Update webhook
+  
+  
+
