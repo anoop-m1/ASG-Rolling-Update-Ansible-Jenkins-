@@ -44,8 +44,7 @@ ASG Rolling Update (Ansible + Jenkins)
 
 <a href="https://ibb.co/yY99LWk"><img src="https://i.ibb.co/HxSSmnP/Untitled.jpg" alt="Untitled" border="0"></a>
 ---
-## Behind the playbook
-_I just explained the primary thing ASG Rolling update and Which variables I used so if you have any further doubts please look at the YAML file complete._
+
 ### ASG Rolling update (_Primary Code_)
 ```sh
 ---
