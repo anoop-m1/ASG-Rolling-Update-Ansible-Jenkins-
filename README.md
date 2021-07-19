@@ -37,18 +37,6 @@ ASG Rolling Update (Ansible + Jenkins)
 - [file](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/file_module.html)
 - [pause](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/pause_module.html)
 ---
-### How To Use
-Ansible Installation article is in pre-request section so please check out the pre-request section.
-```sh
-amzon-linux-extras install -y ansible2
-yum install git -y
-git clone https://github.com/yousafkhamza/ASG-rolling-update.git
-cd ASG-rolling-update
-
----Please-Change Your-Credentials---
-
-ansible-playbook main.yml
-```
 ---
 ## Architecture with Jenkins Automated
 
